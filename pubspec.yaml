@@ -1,7 +1,7 @@
 name: animated_marker
-description: A new Flutter package project.
+description: The AnimatedMarker widget is a Dart class that animates the movement of markers on a Google map.
 version: 0.0.1
-homepage: null
+homepage: https://github.com/landxcape/animated_marker
 
 environment:
   sdk: '>=2.19.3 <3.0.0'
