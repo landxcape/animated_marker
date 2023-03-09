@@ -13,6 +13,7 @@ class AnimatedMarker extends StatefulWidget {
   ///
   /// this widget will then calculate and animate the [Marker] from
   /// it's old position to the new position automatically in the [duration]
+  /// with a [curve]
   const AnimatedMarker({
     super.key,
 
@@ -24,11 +25,15 @@ class AnimatedMarker extends StatefulWidget {
 
     /// default [duration] of 1 seconds
     this.duration = const Duration(seconds: 1),
+
+    /// default [curve] of [Curves.ease]
+    this.curve = Curves.ease,
   });
   final Set<Marker> markerPositions;
   final Widget Function(BuildContext context, Set<Marker> animatedMarkers)
       builder;
   final Duration duration;
+  final Curve curve;
 
   @override
   State<AnimatedMarker> createState() => AnimatedMarkerState();
@@ -75,7 +80,7 @@ class AnimatedMarkerState extends State<AnimatedMarker>
         return MarkerTween(
           begin: pair.values.first,
           end: pair.keys.first,
-        ).animate(_controller);
+        ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
       },
     ).toSet();
 
@@ -128,7 +133,7 @@ class AnimatedMarkerState extends State<AnimatedMarker>
         return MarkerTween(
           begin: pair.values.first,
           end: pair.keys.first,
-        ).animate(_controller);
+        ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
       },
     ).toSet();
   }
