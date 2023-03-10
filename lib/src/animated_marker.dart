@@ -112,30 +112,31 @@ class AnimatedMarkerState extends State<AnimatedMarker>
     /// and restart the animation controller
     if (oldWidget.markerPositions != widget.markerPositions) {
       _lastMarkerPositions = oldWidget.markerPositions;
+
+      /// update the list of marker pairs of the same [MarkerId] according to the
+      /// input [markerPositions]
+      _markerPairs = widget.markerPositions.map<Map<Marker, Marker>>((marker) {
+        return <Marker, Marker>{
+          marker: _lastMarkerPositions.firstWhere(
+            (lastMarker) => lastMarker.markerId == marker.markerId,
+            orElse: () => marker,
+          )
+        };
+      }).toSet();
+
+      /// update the [MarkerTween] animations from the pair of updated markers
+      _markerAnimations = _markerPairs.map<Animation<Marker>>(
+        (pair) {
+          return MarkerTween(
+            begin: pair.values.first,
+            end: pair.keys.first,
+          ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
+        },
+      ).toSet();
+
       _controller.reset();
       _controller.forward();
     }
-
-    /// update the list of marker pairs of the same [MarkerId] according to the
-    /// input [markerPositions]
-    _markerPairs = widget.markerPositions.map<Map<Marker, Marker>>((marker) {
-      return <Marker, Marker>{
-        marker: _lastMarkerPositions.firstWhere(
-          (lastMarker) => lastMarker.markerId == marker.markerId,
-          orElse: () => marker,
-        )
-      };
-    }).toSet();
-
-    /// update the [MarkerTween] animations from the pair of updated markers
-    _markerAnimations = _markerPairs.map<Animation<Marker>>(
-      (pair) {
-        return MarkerTween(
-          begin: pair.values.first,
-          end: pair.keys.first,
-        ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
-      },
-    ).toSet();
   }
 
   @override
