@@ -1,6 +1,6 @@
 name: animated_marker
 description: The AnimatedMarker widget is a Dart class that animates the movement of markers on a Google map.
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/landxcape/animated_marker
 
 environment:

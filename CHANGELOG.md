@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.3
+
+* Update marker pairs only when the list markers are different in update
+
 ## 0.0.2
 
 * Added Curve Animation; you can now give curve effect to the animations
