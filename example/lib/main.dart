@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
             }).toSet();
 
             return AnimatedMarker(
-              markerPositions: markers,
+              animatedMarkers: markers,
               duration:
                   const Duration(seconds: 3), // change the animation duration
               builder: (context, animatedMarkers) {

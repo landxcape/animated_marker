@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.4
+
+* added "staticMarkers" field (those markers that are not to animate)
+* changed "markerLocations" to "animatedMarkers"
+
 ## 0.0.3
 
 * Update marker pairs only when the list markers are different in update
