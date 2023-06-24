@@ -19,14 +19,16 @@ Here's an example of how to use AnimatedMarker:
 
 ```dart
 class MyMapScreen extends StatelessWidget {
-  final Set<Marker> _markers = // create a set of markers here...
+  final Set<Marker> _sMarkers = // markers not needing animation...
+  final Set<Marker> _aMarkers = // markers to animate...
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedMarker(
-        markerPositions: _markers,
-        duration: Duration(seconds: 2),
+        staticMarkers: _sMarkers,
+        animatedMarkers: _aMarkers,
+        duration: const Duration(seconds: 3), // animation duration
         builder: (BuildContext context, Set<Marker> animatedMarkers) {
           return GoogleMap(
             // setup your google map with marker options here...
