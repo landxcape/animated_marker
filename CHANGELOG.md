@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.5
+
+* updated examples showing latest changes
+
 ## 0.0.4
 
 * added "staticMarkers" field (those markers that are not to animate)
