@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.7
+
+* Refactored marker animation logic for improved performance
+
 ## 0.0.6
 
 * Fixed janky marker animations where the marker would jump to new locations if the animation was interrupted with new data

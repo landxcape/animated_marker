@@ -1,6 +1,7 @@
 import 'package:animated_marker/animated_marker.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' show Marker, GoogleMap;
+import 'package:google_maps_flutter/google_maps_flutter.dart'
+    show Marker, GoogleMap;
 
 class AnimatedMarker extends StatefulWidget {
   /// Wrap a [GoogleMap] with this [AnimatedMarker] widget
@@ -33,7 +34,8 @@ class AnimatedMarker extends StatefulWidget {
   }) : staticMarkers = staticMarkers ?? <Marker>{};
   final Set<Marker> animatedMarkers;
   final Set<Marker> staticMarkers;
-  final Widget Function(BuildContext context, Set<Marker> animatedMarkers) builder;
+  final Widget Function(BuildContext context, Set<Marker> animatedMarkers)
+      builder;
   final Duration duration;
   final Curve curve;
 
@@ -41,7 +43,8 @@ class AnimatedMarker extends StatefulWidget {
   State<AnimatedMarker> createState() => AnimatedMarkerState();
 }
 
-class AnimatedMarkerState extends State<AnimatedMarker> with SingleTickerProviderStateMixin {
+class AnimatedMarkerState extends State<AnimatedMarker>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Set<Animation<Marker>> _markerAnimations;
   late Set<Marker> _lastMarkerPositions;
