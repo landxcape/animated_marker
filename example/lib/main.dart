@@ -41,8 +41,7 @@ class MyApp extends StatelessWidget {
           markerId: MarkerId('static-$i'),
           position: mockPositionsStatic.elementAt(i),
           infoWindow: InfoWindow(title: 'Static Marker $i'),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
         ),
     };
 
@@ -65,8 +64,7 @@ class MyApp extends StatelessWidget {
             return AnimatedMarker(
               staticMarkers: staticMarkers,
               animatedMarkers: markers,
-              duration:
-                  const Duration(seconds: 3), // change the animation duration
+              duration: const Duration(seconds: 3), // change the animation duration
               builder: (context, animatedMarkers) {
                 return GoogleMap(
                   initialCameraPosition: CameraPosition(

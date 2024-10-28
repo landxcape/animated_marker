@@ -1,11 +1,11 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/home/l/snap/flutter/common/flutter"
-export "FLUTTER_APPLICATION_PATH=/home/l/Documents/self/flutter_packages/animated_marker"
+export "FLUTTER_ROOT=/Users/shakyapurna/development/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/shakyapurna/dev/packages/flutter/animated_marker"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
-export "FLUTTER_BUILD_NAME=0.0.3"
-export "FLUTTER_BUILD_NUMBER=0.0.3"
+export "FLUTTER_BUILD_NAME=0.0.7"
+export "FLUTTER_BUILD_NUMBER=0.0.7"
 export "DART_OBFUSCATION=false"
 export "TRACK_WIDGET_CREATION=true"
 export "TREE_SHAKE_ICONS=false"
