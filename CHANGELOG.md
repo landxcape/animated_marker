@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.8
+
+* Chore: updated to use latest version of flutter and packages
+
 ## 0.0.7
 
 * Refactored marker animation logic for improved performance
