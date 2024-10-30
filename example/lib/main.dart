@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animated_marker/animated_marker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -57,6 +59,7 @@ class MyApp extends StatelessWidget {
               Marker(
                 markerId: const MarkerId('uniqueMarkerId'),
                 position: snapshot.data!,
+                rotation: Random().nextDouble() * 360, // randomize the rotation
                 infoWindow: const InfoWindow(title: 'Animated Marker'),
               )
             };
@@ -65,6 +68,8 @@ class MyApp extends StatelessWidget {
               staticMarkers: staticMarkers,
               animatedMarkers: markers,
               duration: const Duration(seconds: 3), // change the animation duration
+              fps: 30, // change the animation frames per second
+              curve: Curves.easeOut, // change the animation curve
               builder: (context, animatedMarkers) {
                 return GoogleMap(
                   initialCameraPosition: CameraPosition(

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0
+
+* Changed marker animation method from `AnimationController` to `Ticker` to add fps control and improve performance by reducing unnecessary repaints.
+
 ## 0.0.8
 
 * Chore: updated to use latest version of flutter and packages
