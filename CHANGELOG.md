@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2
+
+* Fixed markers stream to initially emit only after the widgets are built.
+
+## 0.1.1
+
+* Fixed initially markers showing late due to waiting for the animation to start. Now, it shows all the markers before animation.
+
 ## 0.1.0
 
 * Changed marker animation method from `AnimationController` to `Ticker` to add fps control and improve performance by reducing unnecessary repaints.
