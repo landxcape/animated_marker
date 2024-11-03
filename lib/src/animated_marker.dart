@@ -97,6 +97,13 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
     _animationSteps = widget.fps * widget.duration.inMilliseconds / 1000;
     _animationInterval = widget.duration / _animationSteps;
     _markersStreamController = StreamController<Set<Marker>>.broadcast();
+
+    // Add initial markers to the stream.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final initialMarkers =
+          widget.staticMarkers.followedBy(widget.animatedMarkers).toSet();
+      _markersStreamController.add(initialMarkers);
+    });
   }
 
   @override
