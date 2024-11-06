@@ -130,6 +130,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
       if (oldMarker != null && oldMarker != marker) {
         updatedMarkerPairs[oldMarker] = marker;
       } else {
+        if (oldMarker == null) _transitioningMarkers[marker.markerId] = marker;
         sameAnimatedMarkers[marker.markerId] = marker;
       }
     }
