@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+* Fixed markers flickering on map load due to new markers being added before the initial animation completes.
+
 ## 0.1.2
 
 * Fixed markers stream to initially emit only after the widgets are built.
