@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+* Fixed static markers' `InfoWindow`'s `onTap` callback not working.
+
 ## 0.1.3
 
 * Fixed markers flickering on map load due to new markers being added before the initial animation completes.
