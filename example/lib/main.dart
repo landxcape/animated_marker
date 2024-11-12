@@ -37,51 +37,78 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final staticMarkers = {
       for (int i = 0; i < mockPositionsStatic.length; i++)
         Marker(
           markerId: MarkerId('static-$i'),
           position: mockPositionsStatic.elementAt(i),
-          infoWindow: InfoWindow(title: 'Static Marker $i'),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          infoWindow: InfoWindow(
+            title: 'Static Marker $i',
+            onTap: () => showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text('Static Marker $i'),
+              ),
+            ),
+          ),
         ),
     };
 
-    return MaterialApp(
-      home: Scaffold(
-        /// implementation with a StreamBuilder using the above stream:
-        body: StreamBuilder<LatLng>(
-          stream: positionStream, // use the stream in the builder
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) return Container(); // handle no data
+    return Scaffold(
+      /// implementation with a StreamBuilder using the above stream:
+      body: StreamBuilder<LatLng>(
+        stream: positionStream, // use the stream in the builder
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return Container(); // handle no data
 
-            final markers = {
-              Marker(
-                markerId: const MarkerId('uniqueMarkerId'),
-                position: snapshot.data!,
-                rotation: Random().nextDouble() * 360, // randomize the rotation
-                infoWindow: const InfoWindow(title: 'Animated Marker'),
-              )
-            };
-
-            return AnimatedMarker(
-              staticMarkers: staticMarkers,
-              animatedMarkers: markers,
-              duration: const Duration(seconds: 3), // change the animation duration
-              fps: 30, // change the animation frames per second
-              curve: Curves.easeOut, // change the animation curve
-              builder: (context, animatedMarkers) {
-                return GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: mockPositions.first,
-                    zoom: 13,
+          final markers = {
+            Marker(
+              markerId: const MarkerId('uniqueMarkerId'),
+              position: snapshot.data!,
+              rotation: Random().nextDouble() * 360, // randomize the rotation
+              infoWindow: InfoWindow(
+                title: 'Animated Marker',
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (context) => const AlertDialog(
+                    title: Text('Animated Marker Info'),
                   ),
-                  markers: animatedMarkers,
-                );
-              },
-            );
-          },
-        ),
+                ),
+              ),
+            )
+          };
+
+          return AnimatedMarker(
+            staticMarkers: staticMarkers,
+            animatedMarkers: markers,
+            duration: const Duration(seconds: 3), // change the animation duration
+            fps: 30, // change the animation frames per second
+            curve: Curves.easeOut, // change the animation curve
+            builder: (context, animatedMarkers) {
+              return GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: mockPositions.first,
+                  zoom: 13,
+                ),
+                markers: animatedMarkers,
+              );
+            },
+          );
+        },
       ),
     );
   }

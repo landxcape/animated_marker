@@ -81,6 +81,7 @@ class AnimatedMarker extends StatefulWidget {
 }
 
 class _AnimatedMarkerState extends State<AnimatedMarker> {
+  late final Set<Marker> _staticMarkers;
   late final StreamController<Set<Marker>> _markersStreamController;
   late final Map<MarkerId, Marker> _transitioningMarkers;
 
@@ -93,6 +94,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
     super.initState();
 
     // Set initial state for markers and animation configurations.
+    _staticMarkers = widget.staticMarkers;
     _transitioningMarkers = widget.animatedMarkersMap;
     _animationSteps = widget.fps * widget.duration.inMilliseconds / 1000;
     _animationInterval = widget.duration / _animationSteps;
@@ -101,7 +103,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
     // Add initial markers to the stream.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final initialMarkers =
-          widget.staticMarkers.followedBy(widget.animatedMarkers).toSet();
+          _staticMarkers.followedBy(widget.animatedMarkers).toSet();
       _markersStreamController.add(initialMarkers);
     });
   }
@@ -137,7 +139,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
 
     // Combine static markers and unchanged animated markers.
     final Set<Marker> allStaticMarkers =
-        widget.staticMarkers.followedBy(sameAnimatedMarkers.values).toSet();
+        _staticMarkers.followedBy(sameAnimatedMarkers.values).toSet();
 
     // If there are no marker changes, update the stream with static markers only.
     if (updatedMarkerPairs.isEmpty) {
@@ -199,7 +201,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
               !snapshot.hasData) {
             return widget.builder(
                 context,
-                widget.staticMarkers
+                _staticMarkers
                     .followedBy(_transitioningMarkers.values)
                     .toSet());
           }
