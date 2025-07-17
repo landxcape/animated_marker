@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+
+* Merged [pr#14] Refactor animated marker update and animation logic
+
 ## 0.1.4
 
 * Fixed static markers' `InfoWindow`'s `onTap` callback not working.
