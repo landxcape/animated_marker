@@ -1,0 +1,18 @@
+# Generated/local tooling files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+build/
+
+# Local platform scaffolding not needed for package publish
+android/
+ios/
+linux/
+macos/
+windows/
+
+# Example build artifacts
+example/**/.dart_tool/
+example/**/build/
+example/.metadata

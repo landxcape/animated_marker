@@ -20,7 +20,9 @@ extension LatLngExt on LatLng {
   /// Linearly interpolates between this [LatLng] and another [LatLng].
   /// [step] should be a value between 0.0 and 1.0 (inclusive).
   LatLng lerp(LatLng other, {required double step}) {
-    assert(step >= 0.0 && step <= 1.0);
+    if (step < 0.0 || step > 1.0) {
+      throw RangeError.value(step, 'step', 'Must be between 0.0 and 1.0.');
+    }
     return LatLng(
       latitude * (1 - step) + other.latitude * step,
       longitude * (1 - step) + other.longitude * step,
@@ -32,7 +34,14 @@ extension LatLngExt on LatLng {
 extension DurationExt on Duration {
   /// Divides the duration by a given divisor.
   Duration operator /(double divisor) {
-    return Duration(microseconds: inMicroseconds ~/ divisor);
+    if (divisor <= 0 || !divisor.isFinite) {
+      throw ArgumentError.value(
+        divisor,
+        'divisor',
+        'Must be a finite number greater than 0.',
+      );
+    }
+    return Duration(microseconds: (inMicroseconds / divisor).round());
   }
 }
 
@@ -42,7 +51,9 @@ extension IntExtension on double {
   /// The interpolation is normalized to the range [0, 360].
   /// [step] should be a value between 0.0 and 1.0 (inclusive).
   double lerp(double angle, {required double step}) {
-    assert(step >= 0.0 && step <= 1.0);
+    if (step < 0.0 || step > 1.0) {
+      throw RangeError.value(step, 'step', 'Must be between 0.0 and 1.0.');
+    }
     // Normalize angles between 0 and 360
     final angleA = this % 360;
     angle %= 360;

@@ -1,4 +1,5 @@
 import 'package:flutter/animation.dart';
+import 'package:animated_marker/src/extensions.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'
     show Marker, LatLng;
 
@@ -15,53 +16,28 @@ class MarkerTween extends Tween<Marker> {
     required super.end,
   });
 
-  /// this function normalizes the rotation values within 360 degrees
-  ///
-  /// then converts negative values to positive equivalent angles
-  /// then calculates the shortest path for the rotation to calculate
-  /// (for example, it will go directly from +10 degrees to -10 degrees without
-  /// rotating full 340 degrees)
-  /// it will also calculate and choose the shortest path to rotate
-  /// (i.e. it wont rotate over 180 degrees, it will calculate and take another
-  /// direction instead)
-  double _calculateRotation(
-      double beginRotation, double endRotation, double t) {
-    beginRotation %= 360;
-    endRotation %= 360;
-
-    if (beginRotation < 0) beginRotation += 360;
-    if (endRotation < 0) endRotation += 360;
-
-    final diff = (beginRotation - endRotation).abs();
-    if (diff > 180) {
-      if (beginRotation > 180) {
-        beginRotation -= 360;
-      } else {
-        endRotation -= 360;
-      }
-    }
-    return beginRotation + (endRotation - beginRotation) * t;
-  }
-
   @override
   Marker lerp(double t) {
-    return Marker(
-      markerId: end!.markerId,
-      position: LatLng(
-        begin!.position.latitude +
-            (end!.position.latitude - begin!.position.latitude) * t,
-        begin!.position.longitude +
-            (end!.position.longitude - begin!.position.longitude) * t,
+    final startMarker = begin!;
+    final targetMarker = end!;
+    final interpolatedZIndex =
+        (startMarker.zIndexInt +
+                (targetMarker.zIndexInt - startMarker.zIndexInt) * t)
+            .round();
+
+    return targetMarker.copyWith(
+      positionParam: LatLng(
+        startMarker.position.latitude +
+            (targetMarker.position.latitude - startMarker.position.latitude) *
+                t,
+        startMarker.position.longitude +
+            (targetMarker.position.longitude - startMarker.position.longitude) *
+                t,
       ),
-      icon: end!.icon,
-      alpha: begin!.alpha + (end!.alpha - begin!.alpha) * t,
-      anchor: end!.anchor,
-      draggable: end!.draggable,
-      flat: end!.flat,
-      infoWindow: end!.infoWindow,
-      rotation: _calculateRotation(begin!.rotation, end!.rotation, t),
-      visible: end!.visible,
-      zIndex: begin!.zIndex + (end!.zIndex - begin!.zIndex) * t,
+      alphaParam:
+          startMarker.alpha + (targetMarker.alpha - startMarker.alpha) * t,
+      rotationParam: startMarker.rotation.lerp(targetMarker.rotation, step: t),
+      zIndexIntParam: interpolatedZIndex,
     );
   }
 }
