@@ -349,6 +349,59 @@ void main() {
     );
   });
 
+  testWidgets(
+    'AnimatedMarker viewportAnimationBoundsListenable updates guard without parent rebuild',
+    (tester) async {
+      Set<Marker> latestMarkers = <Marker>{};
+      final viewportNotifier = ValueNotifier<LatLngBounds?>(
+        LatLngBounds(
+          southwest: const LatLng(-10, -10),
+          northeast: const LatLng(10, 10),
+        ),
+      );
+
+      Widget buildWidget(Set<Marker> markers) {
+        return MaterialApp(
+          home: AnimatedMarker(
+            animatedMarkers: markers,
+            duration: const Duration(seconds: 1),
+            fps: 4,
+            curve: Curves.linear,
+            viewportAnimationBoundsListenable: viewportNotifier,
+            builder: (_, streamedMarkers) {
+              latestMarkers = streamedMarkers;
+              return const SizedBox.shrink();
+            },
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildWidget({_marker(id: 'car', lat: 0)}));
+      await tester.pump();
+
+      await tester.pumpWidget(buildWidget({_marker(id: 'car', lat: 4)}));
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(
+        _findMarker(latestMarkers, 'car').position.latitude,
+        closeTo(1, 0.001),
+      );
+
+      // Update only the notifier value; no AnimatedMarker rebuild required.
+      viewportNotifier.value = LatLngBounds(
+        southwest: const LatLng(50, 50),
+        northeast: const LatLng(60, 60),
+      );
+      await tester.pump();
+
+      await tester.pumpWidget(buildWidget({_marker(id: 'car', lat: 8)}));
+      await tester.pump();
+      expect(
+        _findMarker(latestMarkers, 'car').position.latitude,
+        closeTo(8, 0.001),
+      );
+    },
+  );
+
   test('MarkerTween interpolates marker position and rotation', () {
     final tween = MarkerTween(
       begin: _marker(id: 'vehicle', lat: 0, rotation: 350),

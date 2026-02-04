@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2
+
+* Feat: added `viewportAnimationBoundsListenable` for runtime viewport guard updates without parent rebuilds.
+* Docs: updated README examples for viewport guard usage.
+
 ## 0.2.1
 
 * Perf: optimized animated marker runtime with stable/active marker buckets.

@@ -14,7 +14,7 @@ position or rotation changes.
 
 ```yaml
 dependencies:
-  animated_marker: ^0.2.1
+  animated_marker: ^0.2.2
 ```
 
 ## Usage
@@ -28,6 +28,9 @@ AnimatedMarker(
   curve: Curves.easeOut,
   // Optional: skip interpolation for markers fully outside this viewport.
   viewportAnimationBounds: currentMapBounds,
+  // Optional (recommended for frequent camera updates):
+  // pass bounds via ValueListenable to avoid parent rebuild churn.
+  // viewportAnimationBoundsListenable: boundsNotifier,
   builder: (context, markers) {
     return GoogleMap(
       initialCameraPosition: const CameraPosition(

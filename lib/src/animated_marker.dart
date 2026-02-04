@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:animated_marker/src/extensions.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -26,6 +27,8 @@ class AnimatedMarker extends StatefulWidget {
   /// [fps] controls the frames per second for marker updates.
   /// [viewportAnimationBounds], when provided, skips interpolation for marker
   /// updates fully outside those bounds.
+  /// [viewportAnimationBoundsListenable] provides dynamic bounds updates
+  /// without requiring parent widget rebuilds for every camera movement.
   AnimatedMarker({
     super.key,
 
@@ -50,6 +53,9 @@ class AnimatedMarker extends StatefulWidget {
 
     /// Optional viewport bounds to guard interpolation.
     this.viewportAnimationBounds,
+
+    /// Optional dynamic viewport bounds source for guard interpolation.
+    this.viewportAnimationBoundsListenable,
   }) : staticMarkersMap = {
          for (var marker in staticMarkers) marker.markerId: marker,
        },
@@ -85,6 +91,12 @@ class AnimatedMarker extends StatefulWidget {
   /// or target position is inside these bounds.
   final LatLngBounds? viewportAnimationBounds;
 
+  /// Optional dynamic viewport bounds source.
+  ///
+  /// If provided, this takes precedence over [viewportAnimationBounds] and is
+  /// listened to at runtime without needing parent rebuilds.
+  final ValueListenable<LatLngBounds?>? viewportAnimationBoundsListenable;
+
   /// Internal map for fast lookup of static markers by [MarkerId].
   final Map<MarkerId, Marker> staticMarkersMap;
 
@@ -112,6 +124,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
   int _animationSteps = 1;
   Duration _animationInterval = const Duration(milliseconds: 16);
   Timer? _tickerTimer;
+  LatLngBounds? _latestViewportAnimationBounds;
 
   @override
   void initState() {
@@ -124,6 +137,8 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
     );
     _activeAnimatedMarkers = <MarkerId, Marker>{};
     _refreshAnimationConfig();
+    _attachViewportBoundsListener(widget.viewportAnimationBoundsListenable);
+    _refreshViewportAnimationBounds();
     _markersStreamController = StreamController<Set<Marker>>.broadcast();
 
     // Add initial markers to the stream.
@@ -139,6 +154,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
   void dispose() {
     // Close the stream to avoid memory leaks.
     _tickerTimer?.cancel();
+    _detachViewportBoundsListener(widget.viewportAnimationBoundsListenable);
     _markersStreamController.close();
     super.dispose();
   }
@@ -174,6 +190,28 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
     );
   }
 
+  void _onViewportBoundsChanged() {
+    _refreshViewportAnimationBounds();
+  }
+
+  void _refreshViewportAnimationBounds() {
+    _latestViewportAnimationBounds =
+        widget.viewportAnimationBoundsListenable?.value ??
+        widget.viewportAnimationBounds;
+  }
+
+  void _attachViewportBoundsListener(
+    ValueListenable<LatLngBounds?>? listenable,
+  ) {
+    listenable?.addListener(_onViewportBoundsChanged);
+  }
+
+  void _detachViewportBoundsListener(
+    ValueListenable<LatLngBounds?>? listenable,
+  ) {
+    listenable?.removeListener(_onViewportBoundsChanged);
+  }
+
   bool _isInsideBounds(LatLng point, LatLngBounds bounds) {
     final sw = bounds.southwest;
     final ne = bounds.northeast;
@@ -189,7 +227,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
   }
 
   bool _shouldAnimateMarker(Marker current, Marker target) {
-    final bounds = widget.viewportAnimationBounds;
+    final bounds = _latestViewportAnimationBounds;
     if (bounds == null) {
       return true;
     }
@@ -200,6 +238,14 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
   @override
   void didUpdateWidget(covariant AnimatedMarker oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.viewportAnimationBoundsListenable !=
+        widget.viewportAnimationBoundsListenable) {
+      _detachViewportBoundsListener(
+        oldWidget.viewportAnimationBoundsListenable,
+      );
+      _attachViewportBoundsListener(widget.viewportAnimationBoundsListenable);
+    }
+    _refreshViewportAnimationBounds();
     _tickerTimer
         ?.cancel(); // Cancel any active timer before starting a new one.
     _refreshAnimationConfig();
