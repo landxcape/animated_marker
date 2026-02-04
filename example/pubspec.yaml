@@ -4,14 +4,14 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: ^3.5.3
+  sdk: ^3.7.0
 
 dependencies:
   animated_marker:
     path: ../
   flutter:
     sdk: flutter
-  google_maps_flutter: ^2.9.0
+  google_maps_flutter: ^2.14.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0

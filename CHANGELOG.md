@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+* Chore: modernized package metadata and SDK constraints for current Flutter.
+* Chore: improved README and publish hygiene (`.pubignore`).
+* Refactor: tightened animation lifecycle safety and added package tests.
+* Fix: replaced deprecated marker z-index API usage.
+
 ## 0.1.5
 
 * Merged [pr#14] Refactor animated marker update and animation logic

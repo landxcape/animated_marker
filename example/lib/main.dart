@@ -37,16 +37,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomePage(),
-    );
+    return const MaterialApp(home: HomePage());
   }
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({
-    super.key,
-  });
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,15 +51,17 @@ class HomePage extends StatelessWidget {
         Marker(
           markerId: MarkerId('static-$i'),
           position: mockPositionsStatic.elementAt(i),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueOrange,
+          ),
           infoWindow: InfoWindow(
             title: 'Static Marker $i',
-            onTap: () => showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text('Static Marker $i'),
-              ),
-            ),
+            onTap:
+                () => showDialog(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(title: Text('Static Marker $i')),
+                ),
           ),
         ),
     };
@@ -82,20 +80,24 @@ class HomePage extends StatelessWidget {
               rotation: Random().nextDouble() * 360, // randomize the rotation
               infoWindow: InfoWindow(
                 title: 'Animated Marker',
-                onTap: () => showDialog(
-                  context: context,
-                  builder: (context) => const AlertDialog(
-                    title: Text('Animated Marker Info'),
-                  ),
-                ),
+                onTap:
+                    () => showDialog(
+                      context: context,
+                      builder:
+                          (context) => const AlertDialog(
+                            title: Text('Animated Marker Info'),
+                          ),
+                    ),
               ),
-            )
+            ),
           };
 
           return AnimatedMarker(
             staticMarkers: staticMarkers,
             animatedMarkers: markers,
-            duration: const Duration(seconds: 3), // change the animation duration
+            duration: const Duration(
+              seconds: 3,
+            ), // change the animation duration
             fps: 30, // change the animation frames per second
             curve: Curves.easeOut, // change the animation curve
             builder: (context, animatedMarkers) {
