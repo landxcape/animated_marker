@@ -2,7 +2,7 @@
 
 ## 0.2.0
 
-* Chore: modernized package metadata and SDK constraints for current Flutter.
+* Chore: updated package metadata and SDK constraints for current Flutter.
 * Chore: improved README and publish hygiene (`.pubignore`).
 * Refactor: tightened animation lifecycle safety and added package tests.
 * Fix: replaced deprecated marker z-index API usage.
