@@ -47,22 +47,25 @@ void main() {
     },
   );
 
-  test('AnimatedMarker validates constructor inputs', () {
+  test('AnimationPolicy validates constructor inputs', () {
     final marker = _marker(id: 'm1', lat: 0);
+    expect(() => AnimationPolicy(maxFps: 0), throwsAssertionError);
+    expect(() => AnimationPolicy(minFps: 0), throwsAssertionError);
 
     expect(
       () => AnimatedMarker(
         animatedMarkers: {marker},
-        fps: 0,
+        animationPolicy: AnimationPolicy(duration: Duration.zero),
         builder: (_, markers) => const SizedBox.shrink(),
       ),
       throwsAssertionError,
     );
-
     expect(
       () => AnimatedMarker(
         animatedMarkers: {marker},
-        duration: Duration.zero,
+        animationPolicy: AnimationPolicy(
+          adaptationCooldown: Duration(seconds: -1),
+        ),
         builder: (_, markers) => const SizedBox.shrink(),
       ),
       throwsAssertionError,
@@ -115,9 +118,11 @@ void main() {
         return MaterialApp(
           home: AnimatedMarker(
             animatedMarkers: markers,
-            duration: const Duration(seconds: 1),
-            fps: 4,
-            curve: Curves.linear,
+            animationPolicy: AnimationPolicy(
+              duration: Duration(seconds: 1),
+              maxFps: 4,
+              curve: Curves.linear,
+            ),
             builder: (_, streamedMarkers) {
               latestMarkers = streamedMarkers;
               return const SizedBox.shrink();
@@ -146,7 +151,7 @@ void main() {
   );
 
   testWidgets(
-    'AnimatedMarker does not snap when rebuilt with the same target mid-animation',
+    'AnimatedMarker does not snap when rebuilt with same target mid-animation',
     (tester) async {
       Set<Marker> latestMarkers = <Marker>{};
 
@@ -154,9 +159,11 @@ void main() {
         return MaterialApp(
           home: AnimatedMarker(
             animatedMarkers: markers,
-            duration: const Duration(seconds: 1),
-            fps: 4,
-            curve: Curves.linear,
+            animationPolicy: AnimationPolicy(
+              duration: Duration(seconds: 1),
+              maxFps: 4,
+              curve: Curves.linear,
+            ),
             builder: (_, streamedMarkers) {
               latestMarkers = streamedMarkers;
               return const SizedBox.shrink();
@@ -189,22 +196,20 @@ void main() {
     },
   );
 
-  testWidgets('AnimatedMarker applies updated FPS while animating', (
+  testWidgets('AnimatedMarker applies updated maxFps while animating', (
     tester,
   ) async {
     Set<Marker> latestMarkers = <Marker>{};
 
-    Widget buildWidget({
-      required Set<Marker> markers,
-      required int fps,
-      Duration duration = const Duration(seconds: 1),
-    }) {
+    Widget buildWidget({required Set<Marker> markers, required int maxFps}) {
       return MaterialApp(
         home: AnimatedMarker(
           animatedMarkers: markers,
-          duration: duration,
-          fps: fps,
-          curve: Curves.linear,
+          animationPolicy: AnimationPolicy(
+            duration: const Duration(seconds: 1),
+            maxFps: maxFps,
+            curve: Curves.linear,
+          ),
           builder: (_, streamedMarkers) {
             latestMarkers = streamedMarkers;
             return const SizedBox.shrink();
@@ -214,12 +219,12 @@ void main() {
     }
 
     await tester.pumpWidget(
-      buildWidget(markers: {_marker(id: 'car', lat: 0)}, fps: 4),
+      buildWidget(markers: {_marker(id: 'car', lat: 0)}, maxFps: 4),
     );
     await tester.pump();
 
     await tester.pumpWidget(
-      buildWidget(markers: {_marker(id: 'car', lat: 4)}, fps: 4),
+      buildWidget(markers: {_marker(id: 'car', lat: 4)}, maxFps: 4),
     );
     await tester.pump(const Duration(milliseconds: 250));
     expect(
@@ -228,7 +233,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      buildWidget(markers: {_marker(id: 'car', lat: 4)}, fps: 2),
+      buildWidget(markers: {_marker(id: 'car', lat: 4)}, maxFps: 2),
     );
     await tester.pump();
     expect(
@@ -259,9 +264,11 @@ void main() {
         home: AnimatedMarker(
           staticMarkers: {_marker(id: 'static', lat: 100)},
           animatedMarkers: markers,
-          duration: const Duration(seconds: 1),
-          fps: 2,
-          curve: Curves.linear,
+          animationPolicy: AnimationPolicy(
+            duration: Duration(seconds: 1),
+            maxFps: 2,
+            curve: Curves.linear,
+          ),
           builder: (_, streamedMarkers) {
             latestMarkers = streamedMarkers;
             return const SizedBox.shrink();
@@ -308,7 +315,7 @@ void main() {
     expect(_hasMarker(latestMarkers, 'b'), isFalse);
   });
 
-  testWidgets('AnimatedMarker viewportAnimationBounds can skip interpolation', (
+  testWidgets('AnimatedMarker viewport bounds can skip interpolation', (
     tester,
   ) async {
     Set<Marker> latestMarkers = <Marker>{};
@@ -317,12 +324,14 @@ void main() {
       return MaterialApp(
         home: AnimatedMarker(
           animatedMarkers: markers,
-          duration: const Duration(seconds: 1),
-          fps: 4,
-          curve: Curves.linear,
-          viewportAnimationBounds: LatLngBounds(
-            southwest: const LatLng(50, 50),
-            northeast: const LatLng(60, 60),
+          animationPolicy: AnimationPolicy(
+            duration: const Duration(seconds: 1),
+            maxFps: 4,
+            curve: Curves.linear,
+            viewportBounds: LatLngBounds(
+              southwest: const LatLng(50, 50),
+              northeast: const LatLng(60, 60),
+            ),
           ),
           builder: (_, streamedMarkers) {
             latestMarkers = streamedMarkers;
@@ -350,7 +359,7 @@ void main() {
   });
 
   testWidgets(
-    'AnimatedMarker viewportAnimationBoundsListenable updates guard without parent rebuild',
+    'AnimatedMarker viewport bounds listenable updates guard without rebuild',
     (tester) async {
       Set<Marker> latestMarkers = <Marker>{};
       final viewportNotifier = ValueNotifier<LatLngBounds?>(
@@ -364,10 +373,12 @@ void main() {
         return MaterialApp(
           home: AnimatedMarker(
             animatedMarkers: markers,
-            duration: const Duration(seconds: 1),
-            fps: 4,
-            curve: Curves.linear,
-            viewportAnimationBoundsListenable: viewportNotifier,
+            animationPolicy: AnimationPolicy(
+              duration: const Duration(seconds: 1),
+              maxFps: 4,
+              curve: Curves.linear,
+              viewportBoundsListenable: viewportNotifier,
+            ),
             builder: (_, streamedMarkers) {
               latestMarkers = streamedMarkers;
               return const SizedBox.shrink();
@@ -386,7 +397,6 @@ void main() {
         closeTo(1, 0.001),
       );
 
-      // Update only the notifier value; no AnimatedMarker rebuild required.
       viewportNotifier.value = LatLngBounds(
         southwest: const LatLng(50, 50),
         northeast: const LatLng(60, 60),
@@ -399,8 +409,78 @@ void main() {
         _findMarker(latestMarkers, 'car').position.latitude,
         closeTo(8, 0.001),
       );
+
+      viewportNotifier.dispose();
     },
   );
+
+  testWidgets('Low profile snaps updates when allowSnapOnLow is true', (
+    tester,
+  ) async {
+    Set<Marker> latestMarkers = <Marker>{};
+
+    Widget buildWidget(Set<Marker> markers) {
+      return MaterialApp(
+        home: AnimatedMarker(
+          animatedMarkers: markers,
+          animationPolicy: AnimationPolicy(
+            profileOverride: AdaptiveProfile.low,
+            allowSnapOnLow: true,
+          ),
+          builder: (_, streamedMarkers) {
+            latestMarkers = streamedMarkers;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget({_marker(id: 'car', lat: 0)}));
+    await tester.pump();
+
+    await tester.pumpWidget(buildWidget({_marker(id: 'car', lat: 4)}));
+    await tester.pump();
+    expect(
+      _findMarker(latestMarkers, 'car').position.latitude,
+      closeTo(4, 0.001),
+    );
+  });
+
+  testWidgets('Low profile can still interpolate when snapping is disabled', (
+    tester,
+  ) async {
+    Set<Marker> latestMarkers = <Marker>{};
+
+    Widget buildWidget(Set<Marker> markers) {
+      return MaterialApp(
+        home: AnimatedMarker(
+          animatedMarkers: markers,
+          animationPolicy: AnimationPolicy(
+            duration: Duration(seconds: 1),
+            maxFps: 30,
+            minFps: 4,
+            curve: Curves.linear,
+            profileOverride: AdaptiveProfile.low,
+            allowSnapOnLow: false,
+          ),
+          builder: (_, streamedMarkers) {
+            latestMarkers = streamedMarkers;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget({_marker(id: 'car', lat: 0)}));
+    await tester.pump();
+
+    await tester.pumpWidget(buildWidget({_marker(id: 'car', lat: 4)}));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(
+      _findMarker(latestMarkers, 'car').position.latitude,
+      closeTo(1, 0.001),
+    );
+  });
 
   test('MarkerTween interpolates marker position and rotation', () {
     final tween = MarkerTween(

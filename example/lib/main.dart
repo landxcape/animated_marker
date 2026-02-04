@@ -95,11 +95,11 @@ class HomePage extends StatelessWidget {
           return AnimatedMarker(
             staticMarkers: staticMarkers,
             animatedMarkers: markers,
-            duration: const Duration(
-              seconds: 3,
-            ), // change the animation duration
-            fps: 30, // change the animation frames per second
-            curve: Curves.easeOut, // change the animation curve
+            animationPolicy: AnimationPolicy(
+              duration: Duration(seconds: 3),
+              maxFps: 30,
+              curve: Curves.easeOut,
+            ),
             builder: (context, animatedMarkers) {
               return GoogleMap(
                 initialCameraPosition: CameraPosition(

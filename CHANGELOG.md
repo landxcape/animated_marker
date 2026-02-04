@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+* Breaking: replaced direct animation params (`duration`, `curve`, `fps`, `viewportAnimationBounds*`) with `animationPolicy`.
+* Feat: added `AnimationPolicy` and `AdaptiveProfile` for centralized animation/runtime behavior.
+* Feat: added optional adaptive profile controls (`adaptiveEnabled`, `profileOverride`, `minFps`, `allowSnapOnLow`, `adaptationCooldown`).
+* Perf: kept viewport guard behavior via `AnimationPolicy.viewportBounds` and `AnimationPolicy.viewportBoundsListenable`.
+* Docs/Test: updated README, example app, and package tests for the new API.
+
 ## 0.2.2
 
 * Feat: added `viewportAnimationBoundsListenable` for runtime viewport guard updates without parent rebuilds.

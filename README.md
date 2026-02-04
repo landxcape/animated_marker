@@ -7,14 +7,14 @@ position or rotation changes.
 
 - Animate marker movement and rotation automatically.
 - Keep non-moving markers separate via `staticMarkers`.
-- Tune motion with `duration`, `curve`, and `fps`.
+- Tune motion with `AnimationPolicy` (`duration`, `curve`, `maxFps`).
 - Plug into any `GoogleMap` via a simple `builder`.
 
 ## Installation
 
 ```yaml
 dependencies:
-  animated_marker: ^0.2.2
+  animated_marker: ^0.3.0
 ```
 
 ## Usage
@@ -23,14 +23,16 @@ dependencies:
 AnimatedMarker(
   staticMarkers: staticMarkers,
   animatedMarkers: animatedMarkers,
-  duration: const Duration(seconds: 3),
-  fps: 30,
-  curve: Curves.easeOut,
-  // Optional: skip interpolation for markers fully outside this viewport.
-  viewportAnimationBounds: currentMapBounds,
-  // Optional (recommended for frequent camera updates):
-  // pass bounds via ValueListenable to avoid parent rebuild churn.
-  // viewportAnimationBoundsListenable: boundsNotifier,
+  animationPolicy: AnimationPolicy(
+    duration: const Duration(seconds: 3),
+    maxFps: 30,
+    curve: Curves.easeOut,
+    // Optional: skip interpolation for markers fully outside this viewport.
+    viewportBounds: currentMapBounds,
+    // Optional (recommended for frequent camera updates):
+    // pass bounds via ValueListenable to avoid parent rebuild churn.
+    // viewportBoundsListenable: boundsNotifier,
+  ),
   builder: (context, markers) {
     return GoogleMap(
       initialCameraPosition: const CameraPosition(
