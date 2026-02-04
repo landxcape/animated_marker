@@ -24,6 +24,8 @@ class AnimatedMarker extends StatefulWidget {
   /// [duration] sets the animation duration.
   /// [curve] defines the interpolation curve.
   /// [fps] controls the frames per second for marker updates.
+  /// [viewportAnimationBounds], when provided, skips interpolation for marker
+  /// updates fully outside those bounds.
   AnimatedMarker({
     super.key,
 
@@ -45,6 +47,9 @@ class AnimatedMarker extends StatefulWidget {
 
     /// The frames per second (FPS) rate for updating animated markers.
     this.fps = 30,
+
+    /// Optional viewport bounds to guard interpolation.
+    this.viewportAnimationBounds,
   }) : staticMarkersMap = {
          for (var marker in staticMarkers) marker.markerId: marker,
        },
@@ -73,6 +78,13 @@ class AnimatedMarker extends StatefulWidget {
   /// The frames per second (FPS) for the animation.
   final int fps;
 
+  /// Optional bounds used to guard interpolation.
+  ///
+  /// If null, all changed animated markers are interpolated.
+  /// If non-null, interpolation runs only for markers where either the current
+  /// or target position is inside these bounds.
+  final LatLngBounds? viewportAnimationBounds;
+
   /// Internal map for fast lookup of static markers by [MarkerId].
   final Map<MarkerId, Marker> staticMarkersMap;
 
@@ -92,7 +104,10 @@ class _MarkerTransition {
 
 class _AnimatedMarkerState extends State<AnimatedMarker> {
   late final StreamController<Set<Marker>> _markersStreamController;
-  late final Map<MarkerId, Marker> _transitioningMarkers;
+  late final Map<MarkerId, Marker> _staticMarkers;
+  late final Map<MarkerId, Marker> _stableAnimatedMarkers;
+  late final Map<MarkerId, Marker> _activeAnimatedMarkers;
+  final Map<MarkerId, _MarkerTransition> _activeTransitions = {};
 
   int _animationSteps = 1;
   Duration _animationInterval = const Duration(milliseconds: 16);
@@ -102,10 +117,12 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
   void initState() {
     super.initState();
 
-    // Set initial state for markers and animation configurations.
-    _transitioningMarkers = Map<MarkerId, Marker>.from(
+    // Set initial state for marker buckets and animation configurations.
+    _staticMarkers = Map<MarkerId, Marker>.from(widget.staticMarkersMap);
+    _stableAnimatedMarkers = Map<MarkerId, Marker>.from(
       widget.animatedMarkersMap,
     );
+    _activeAnimatedMarkers = <MarkerId, Marker>{};
     _refreshAnimationConfig();
     _markersStreamController = StreamController<Set<Marker>>.broadcast();
 
@@ -114,9 +131,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
       if (!mounted || _markersStreamController.isClosed) {
         return;
       }
-      final initialMarkers =
-          widget.staticMarkers.followedBy(_transitioningMarkers.values).toSet();
-      _emitMarkers(initialMarkers);
+      _emitCurrentMarkers();
     });
   }
 
@@ -134,6 +149,18 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
     }
   }
 
+  Set<Marker> _composeCurrentMarkers() {
+    return <Marker>{
+      ..._staticMarkers.values,
+      ..._stableAnimatedMarkers.values,
+      ..._activeAnimatedMarkers.values,
+    };
+  }
+
+  void _emitCurrentMarkers() {
+    _emitMarkers(_composeCurrentMarkers());
+  }
+
   void _refreshAnimationConfig() {
     _animationSteps = math.max(
       1,
@@ -147,65 +174,81 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
     );
   }
 
+  bool _isInsideBounds(LatLng point, LatLngBounds bounds) {
+    final sw = bounds.southwest;
+    final ne = bounds.northeast;
+    final isLatitudeInRange =
+        point.latitude >= sw.latitude && point.latitude <= ne.latitude;
+    final isLongitudeInRange =
+        sw.longitude <= ne.longitude
+            ? (point.longitude >= sw.longitude &&
+                point.longitude <= ne.longitude)
+            : (point.longitude >= sw.longitude ||
+                point.longitude <= ne.longitude);
+    return isLatitudeInRange && isLongitudeInRange;
+  }
+
+  bool _shouldAnimateMarker(Marker current, Marker target) {
+    final bounds = widget.viewportAnimationBounds;
+    if (bounds == null) {
+      return true;
+    }
+    return _isInsideBounds(current.position, bounds) ||
+        _isInsideBounds(target.position, bounds);
+  }
+
   @override
   void didUpdateWidget(covariant AnimatedMarker oldWidget) {
     super.didUpdateWidget(oldWidget);
     _tickerTimer
         ?.cancel(); // Cancel any active timer before starting a new one.
     _refreshAnimationConfig();
+    _staticMarkers
+      ..clear()
+      ..addAll(widget.staticMarkersMap);
 
     // This reflects the latest rendered state, including in-flight animations.
-    final Map<MarkerId, Marker> lastDisplayedMarkers = Map.from(
-      _transitioningMarkers,
-    );
+    final Map<MarkerId, Marker> lastDisplayedMarkers = Map<MarkerId, Marker>.of(
+      _stableAnimatedMarkers,
+    )..addAll(_activeAnimatedMarkers);
 
-    // Clear _transitioningMarkers to repopulate it according to the new logic.
-    // This ensures that only relevant markers are kept at their correct positions.
-    _transitioningMarkers.clear();
-
-    final Map<MarkerId, _MarkerTransition> markersToAnimatePosition = {};
+    // Rebuild stable/active buckets from the latest widget input.
+    _stableAnimatedMarkers.clear();
+    _activeAnimatedMarkers.clear();
+    _activeTransitions.clear();
 
     // Iterate over the new animated markers to identify updates or new additions.
     for (final newMarker in widget.animatedMarkers) {
       final currentDisplayedMarker = lastDisplayedMarkers[newMarker.markerId];
       if (currentDisplayedMarker == null) {
-        // This is a completely new marker. Add it directly to _transitioningMarkers at its final position.
-        _transitioningMarkers[newMarker.markerId] = newMarker;
+        // New animated marker: no interpolation needed this frame.
+        _stableAnimatedMarkers[newMarker.markerId] = newMarker;
       } else {
         // Compare against what is currently shown on screen (not just the
         // previous widget target), so re-builds during animation don't snap.
         if (currentDisplayedMarker.position != newMarker.position ||
             currentDisplayedMarker.rotation != newMarker.rotation) {
-          // Use the last displayed frame when available so interrupted
-          // animations continue smoothly from where they currently are.
-          markersToAnimatePosition[newMarker.markerId] = _MarkerTransition(
-            from: currentDisplayedMarker,
-            to: newMarker,
-          );
-          _transitioningMarkers[newMarker.markerId] = currentDisplayedMarker;
+          if (_shouldAnimateMarker(currentDisplayedMarker, newMarker)) {
+            _activeTransitions[newMarker.markerId] = _MarkerTransition(
+              from: currentDisplayedMarker,
+              to: newMarker,
+            );
+            _activeAnimatedMarkers[newMarker.markerId] = currentDisplayedMarker;
+          } else {
+            _stableAnimatedMarkers[newMarker.markerId] = newMarker;
+          }
         } else {
-          // The marker exists and its position/rotation has not changed.
-          // Add it to _transitioningMarkers with its current data.
-          _transitioningMarkers[newMarker.markerId] = newMarker;
+          // Unchanged animated marker remains stable and skips interpolation.
+          _stableAnimatedMarkers[newMarker.markerId] = newMarker;
         }
       }
     }
 
-    // --- Handling of removed markers ---
-    // The logic for removing markers is implicitly handled by `_transitioningMarkers.clear()`
-    // and subsequent repopulation. Any marker not present in `widget.animatedMarkers`
-    // will not be added back to `_transitioningMarkers`, thus effectively removing it.
-    // At this point, `_transitioningMarkers` correctly holds either:
-    // - The old positions for markers currently animating.
-    // - The new positions for newly added or unchanged markers.
-
-    // Combine static markers and active animated markers for the initial stream update.
-    final Set<Marker> currentDisplayMarkers =
-        widget.staticMarkers.followedBy(_transitioningMarkers.values).toSet();
+    // Removed animated markers are implicitly dropped by bucket rebuild above.
+    _emitCurrentMarkers();
 
     // If there are no markers whose position needs to be animated, update the stream once and return.
-    if (markersToAnimatePosition.isEmpty) {
-      _emitMarkers(currentDisplayMarkers);
+    if (_activeTransitions.isEmpty) {
       return;
     }
 
@@ -218,17 +261,13 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
 
       if (timer.tick >= _animationSteps) {
         // Animation complete: Update with final positions and cancel the timer.
-        // Ensure _transitioningMarkers contains the final positions for ALL animated markers.
-        for (final entry in markersToAnimatePosition.entries) {
-          _transitioningMarkers[entry.key] =
+        for (final entry in _activeTransitions.entries) {
+          _stableAnimatedMarkers[entry.key] =
               entry.value.to; // Store the final state (new position)
         }
-
-        final allFinalMarkers =
-            widget.staticMarkers
-                .followedBy(_transitioningMarkers.values)
-                .toSet();
-        _emitMarkers(allFinalMarkers);
+        _activeTransitions.clear();
+        _activeAnimatedMarkers.clear();
+        _emitCurrentMarkers();
         timer.cancel();
         return;
       }
@@ -237,14 +276,8 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
           (timer.tick / _animationSteps).clamp(0.0, 1.0).toDouble();
       final curveFraction = widget.curve.transform(fraction);
 
-      // Create a temporary map for markers in this animation frame.
-      // Start with the current state of _transitioningMarkers, which includes non-interpolating markers.
-      final Map<MarkerId, Marker> markersForThisFrame = Map.from(
-        _transitioningMarkers,
-      );
-
-      // Calculate interpolated positions for markers in `markersToAnimatePosition` and update them in `markersForThisFrame`.
-      for (final markerPair in markersToAnimatePosition.entries) {
+      // Update only markers currently transitioning.
+      for (final markerPair in _activeTransitions.entries) {
         final oldMarker = markerPair.value.from;
         final newMarker = markerPair.value.to;
 
@@ -263,17 +296,9 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
           positionParam: newLatLng,
           rotationParam: newRotation,
         );
-        markersForThisFrame[newMarkerCopy.markerId] = newMarkerCopy;
+        _activeAnimatedMarkers[newMarkerCopy.markerId] = newMarkerCopy;
       }
-
-      _transitioningMarkers
-        ..clear()
-        ..addAll(markersForThisFrame);
-
-      // Update the stream with the new set of markers for this frame.
-      final allMarkersForThisFrame =
-          widget.staticMarkers.followedBy(markersForThisFrame.values).toSet();
-      _emitMarkers(allMarkersForThisFrame);
+      _emitCurrentMarkers();
     });
   }
 
@@ -286,12 +311,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker> {
         if (snapshot.connectionState == ConnectionState.waiting ||
             snapshot.hasError ||
             !snapshot.hasData) {
-          return widget.builder(
-            context,
-            widget.staticMarkers
-                .followedBy(_transitioningMarkers.values)
-                .toSet(),
-          );
+          return widget.builder(context, _composeCurrentMarkers());
         }
 
         final allMarkers = snapshot.data!;

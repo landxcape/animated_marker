@@ -14,7 +14,7 @@ position or rotation changes.
 
 ```yaml
 dependencies:
-  animated_marker: ^0.2.0
+  animated_marker: ^0.2.1
 ```
 
 ## Usage
@@ -26,6 +26,8 @@ AnimatedMarker(
   duration: const Duration(seconds: 3),
   fps: 30,
   curve: Curves.easeOut,
+  // Optional: skip interpolation for markers fully outside this viewport.
+  viewportAnimationBounds: currentMapBounds,
   builder: (context, markers) {
     return GoogleMap(
       initialCameraPosition: const CameraPosition(

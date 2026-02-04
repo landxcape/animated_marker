@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+* Perf: optimized animated marker runtime with stable/active marker buckets.
+* Feat: added `viewportAnimationBounds` to skip interpolation outside viewport.
+* Test: added coverage for viewport animation guard behavior.
+
 ## 0.2.0
 
 * Chore: updated package metadata and SDK constraints for current Flutter.
