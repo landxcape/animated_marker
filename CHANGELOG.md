@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+* Chore(deps): Upgraded `google_maps_flutter` dependency constraint to `^2.17.1`.
+* Chore: Cleaned up and updated example app configuration and package ignore list.
+
 ## 0.3.0
 
 * Breaking: replaced direct animation params (`duration`, `curve`, `fps`, `viewportAnimationBounds*`) with `animationPolicy`.

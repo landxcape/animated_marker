@@ -14,7 +14,7 @@ position or rotation changes.
 
 ```yaml
 dependencies:
-  animated_marker: ^0.3.0
+  animated_marker: ^0.3.1
 ```
 
 ## Usage
