@@ -29,3 +29,12 @@ migrate_working_dir/
 .packages
 build/
 .vscode/settings.json
+
+# Flutter transient files
+.flutter-plugins
+.flutter-plugins-dependencies
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+
