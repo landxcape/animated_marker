@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+
+* Expanded pub.dev `topics` to include `animation` and `location` for improved category discoverability.
+
 ## 0.3.1
 
 * Chore(deps): Upgraded `google_maps_flutter` dependency constraint to `^2.17.1`.
