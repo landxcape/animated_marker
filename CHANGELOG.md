@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3
+
+* Refactor(deps): Decoupled dependency from `google_maps_flutter` to `google_maps_flutter_platform_interface: ^2.17.0`, eliminating native plugin dependencies while preserving 100% type compatibility.
+* Docs: Refreshed README with installation badges, floating version guidelines, and `AnimationPolicy` adaptive profile configurations.
+* Example: Upgraded example app dependencies to `google_maps_flutter: ^2.19.0`.
+
 ## 0.3.2
 
 * Expanded pub.dev `topics` to include `animation` and `location` for improved category discoverability.

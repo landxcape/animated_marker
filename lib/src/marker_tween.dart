@@ -1,6 +1,6 @@
 import 'package:flutter/animation.dart';
 import 'package:animated_marker/src/extensions.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart'
     show Marker, LatLng;
 
 class MarkerTween extends Tween<Marker> {

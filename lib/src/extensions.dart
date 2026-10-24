@@ -1,4 +1,5 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng;
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart'
+    show LatLng;
 
 /// Extension for [LatLng] to add custom operators and methods.
 extension LatLngExt on LatLng {

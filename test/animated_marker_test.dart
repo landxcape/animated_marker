@@ -2,7 +2,7 @@ import 'package:animated_marker/animated_marker.dart';
 import 'package:animated_marker/src/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 Marker _marker({
   required String id,
