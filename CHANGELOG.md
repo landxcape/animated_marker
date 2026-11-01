@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.4
+
+* Docs: Added interactive sandbox demo badge and web link.
+* Docs: Streamlined installation instructions to recommended CLI command.
+
 ## 0.3.3
 
 * Refactor(deps): Decoupled dependency from `google_maps_flutter` to `google_maps_flutter_platform_interface: ^2.17.0`, eliminating native plugin dependencies while preserving 100% type compatibility.
