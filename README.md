@@ -5,8 +5,11 @@ Smooth marker movement and rotation interpolation for Flutter Google Maps.
 [![pub package](https://img.shields.io/pub/v/animated_marker.svg)](https://pub.dev/packages/animated_marker)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-flutter%20%7C%20android%20%7C%20ios%20%7C%20web-blue)](https://pub.dev/packages/animated_marker)
+[![Interactive Sandbox](https://img.shields.io/badge/demo-interactive%20sandbox-0284C7.svg)](https://shakyapurna.com.np/#/lab/animated_marker/sandbox)
 
 `AnimatedMarker` continuously interpolates position (`LatLng`), bearing/rotation (shortest angular path), alpha, and z-index between location updates without blocking the UI or causing marker jumps. It uses `google_maps_flutter_platform_interface` under the hood to ensure seamless compatibility with any version of `google_maps_flutter` without native plugin conflicts.
+
+An [interactive sandbox](https://shakyapurna.com.np/#/lab/animated_marker/sandbox) is available to test bearing interpolation, shortest-path rotation, and adaptive quality tuning in the browser.
 
 ## Features
 
@@ -14,22 +17,14 @@ Smooth marker movement and rotation interpolation for Flutter Google Maps.
 - **Static vs Animated Partitioning**: Isolate non-moving markers via `staticMarkers` so only active markers undergo ticker calculations.
 - **Viewport Culling**: Skip interpolation for markers outside the current viewport via `viewportBounds` or dynamic `viewportBoundsListenable`.
 - **Adaptive Performance Tuning**: Centralized `AnimationPolicy` with frame-health monitoring (`adaptiveEnabled`, `allowSnapOnLow`, and `AdaptiveProfile` tiers) that automatically reduces frame rate under device load to preserve 60 FPS UI responsiveness.
-- **Zero-Friction DX**: Accepts standard `Set<Marker>` and outputs the effective `Set<Marker>` directly into your `GoogleMap` widget builder.
+- **Direct Map Integration**: Accepts standard `Set<Marker>` and outputs the effective `Set<Marker>` directly into your `GoogleMap` widget builder.
 
 ## Installation
 
-Add via CLI:
+Add the package to your project:
 
 ```bash
 flutter pub add animated_marker
-```
-
-Or add to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  animated_marker: ^<latest>
-  google_maps_flutter: ^<latest>
 ```
 
 ## Quick Start
