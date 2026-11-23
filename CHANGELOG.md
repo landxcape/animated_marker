@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.5
+
+* Migrated from deprecated `package:flutter/material.dart` to `package:material_ui/material_ui.dart` for Flutter 3.50+ compatibility.
+
+
 ## 0.3.4
 
 * Docs: Added interactive sandbox demo badge and web link.
